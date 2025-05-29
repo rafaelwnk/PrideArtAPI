@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PrideArtAPI.Data;
 using PrideArtAPI.Interfaces;
+using PrideArtAPI.Repositories;
 using PrideArtAPI.Services;
 
 namespace PrideArtAPI.Extensions;
@@ -64,6 +65,6 @@ public static class AppExtensions
         });
 
         builder.Services.AddTransient<TokenService>();
-        builder.Services.AddScoped<IAccountService, AccountService>();
+        builder.Services.AddScoped<IAccountRepository, AccountRepository>();
     }
 }

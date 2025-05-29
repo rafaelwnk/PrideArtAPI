@@ -6,13 +6,13 @@ using PrideArtAPI.Models;
 using PrideArtAPI.ViewModels.Accounts;
 using SecureIdentity.Password;
 
-namespace PrideArtAPI.Services;
+namespace PrideArtAPI.Repositories;
 
-public class AccountService : IAccountService
+public class AccountRepository : IAccountRepository
 {
     private readonly DataContext _context;
 
-    public AccountService(DataContext context)
+    public AccountRepository(DataContext context)
     {
         _context = context;
     }

@@ -1,7 +1,6 @@
 using System.Security.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using PrideArtAPI.Extensions;
 using PrideArtAPI.Interfaces;
 using PrideArtAPI.Models;
@@ -14,11 +13,11 @@ namespace PrideArtAPI.Controllers;
 [ApiController]
 public class AccountController : ControllerBase
 {
-    private readonly IAccountService _accountService;
+    private readonly IAccountRepository _accountRepository;
 
-    public AccountController(IAccountService accountService)
+    public AccountController(IAccountRepository accountRepository)
     {
-        _accountService = accountService;
+        _accountRepository = accountRepository;
     }
 
     [HttpPost("v1/accounts/register")]
@@ -29,8 +28,12 @@ public class AccountController : ControllerBase
 
         try
         {
-            var user = await _accountService.RegisterAsync(model);
-            return Ok(new ResultViewModel<User>(user));
+            var user = await _accountRepository.RegisterAsync(model);
+            return Ok(new ResultViewModel<dynamic>(new
+            {
+                user,
+                message = "Cadastro realizado com sucesso!"
+            }));
         }
         catch (DbUpdateException)
         {
@@ -50,7 +53,7 @@ public class AccountController : ControllerBase
 
         try
         {
-            var user = await _accountService.LoginAsync(model);
+            var user = await _accountRepository.LoginAsync(model);
             var token = tokenService.Create(user);
             return Ok(new ResultViewModel<string>(token, null!));
         }
