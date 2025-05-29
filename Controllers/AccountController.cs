@@ -1,5 +1,4 @@
 using System.Security.Authentication;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -106,8 +105,7 @@ public class AccountController : ControllerBase
     {
         try
         {
-            var username = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value;
-            var user = await _accountRepository.GetUserByUsernameAsync(username!);
+            var user = await _accountRepository.GetUserByUsernameAsync(User.Identity!.Name!);
             var token = tokenService.Create(user);
             return Ok(new ResultViewModel<string>(token, null!));
         }
@@ -127,13 +125,7 @@ public class AccountController : ControllerBase
     {
         try
         {
-            var username = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value;
-
-            if (string.IsNullOrEmpty(username))
-                return Unauthorized(new ResultViewModel<string>("Usuário não autenticado."));
-
-            var user = await _accountRepository.GetUserByUsernameAsync(username);
-
+            var user = await _accountRepository.GetUserByUsernameAsync(User.Identity!.Name!);
             return Ok(new ResultViewModel<User>(user));
         }
         catch (UserNotFoundException ex)
@@ -156,12 +148,7 @@ public class AccountController : ControllerBase
 
         try
         {
-            var username = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value;
-
-            if (string.IsNullOrEmpty(username))
-                return Unauthorized(new ResultViewModel<string>("Usuário não autenticado."));
-
-            var loggedUser = await _accountRepository.GetUserByUsernameAsync(username!);
+            var loggedUser = await _accountRepository.GetUserByUsernameAsync(User.Identity!.Name!);
             var user = await _accountRepository.EditProfileAsync(loggedUser, model);
 
             return Ok(new ResultViewModel<dynamic>(new

@@ -3,6 +3,9 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
+# image files
+wwwroot/**/*.jpg
+
 # db files
 *.db
 

@@ -17,6 +17,8 @@ public static class AppExtensions
     {
         Configuration.JwtKey = builder.Configuration.GetValue<string>("JwtKey")!;
         Configuration.AllowedOrigin = builder.Configuration.GetValue<string>("AllowedOrigin")!;
+        Configuration.UrlProfileImage = builder.Configuration.GetValue<string>("UrlProfileImage")!;
+        Configuration.UrlPostImage = builder.Configuration.GetValue<string>("UrlPostImage")!;
     }
 
     public static void ConfigureAuthentication(this WebApplicationBuilder builder)
@@ -66,5 +68,6 @@ public static class AppExtensions
 
         builder.Services.AddTransient<TokenService>();
         builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+        builder.Services.AddScoped<IPostRepository, PostRepository>();
     }
 }
