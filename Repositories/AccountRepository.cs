@@ -70,11 +70,25 @@ public class AccountRepository : IAccountRepository
     public async Task<User> GetUserByUsernameAsync(string username)
     {
         var user = await _context.Users
-            .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Username == username);
 
         if (user == null)
             throw new UserNotFoundException();
+
+        return user;
+    }
+
+    public async Task<User> EditProfileAsync(User user, EditProfileViewModel model)
+    {
+        user.Name = model.Name;
+        user.Username = model.Username;
+        user.Email = model.Email;
+        user.Identity = model.Identity;
+        user.Bio = model.Bio;
+        user.Image = model.Image;
+
+        _context.Users.Update(user);
+        await _context.SaveChangesAsync();
 
         return user;
     }

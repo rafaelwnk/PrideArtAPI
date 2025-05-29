@@ -119,4 +119,36 @@ public class AccountController : ControllerBase
             return StatusCode(500, new ResultViewModel<string>("Erro interno."));
         }
     }
+
+    [Authorize]
+    [HttpPut("v1/accounts/edit-profile")]
+    public async Task<IActionResult> EditProfileAsync([FromBody] EditProfileViewModel model)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(new ResultViewModel<string>(ModelState.GetErrors()));
+
+        try
+        {
+            var username = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value;
+            var loggedUser = await _accountRepository.GetUserByUsernameAsync(username!);
+            var user = await _accountRepository.EditProfileAsync(loggedUser, model);
+            return Ok(new ResultViewModel<dynamic>(new
+            {
+                user,
+                message = "Perfil atualizado com sucesso!"
+            }));
+        }
+        catch (UserNotFoundException ex)
+        {
+            return NotFound(new ResultViewModel<string>(ex.Message));
+        }
+        catch (DbUpdateException)
+        {
+            return StatusCode(400, new ResultViewModel<string>("Não foi possível atualizar o perfil."));
+        }
+        catch
+        {
+            return StatusCode(500, new ResultViewModel<string>("Erro interno."));
+        }
+    }
 }
