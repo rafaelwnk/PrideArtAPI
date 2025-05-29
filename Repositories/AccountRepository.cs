@@ -81,7 +81,6 @@ public class AccountRepository : IAccountRepository
     public async Task<User> EditProfileAsync(User user, EditProfileViewModel model)
     {
         user.Name = model.Name;
-        user.Username = model.Username;
         user.Email = model.Email;
         user.Identity = model.Identity;
         user.Bio = model.Bio;

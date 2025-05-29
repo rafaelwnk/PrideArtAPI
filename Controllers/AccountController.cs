@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using PrideArtAPI.Exceptions;
 using PrideArtAPI.Extensions;
 using PrideArtAPI.Interfaces;
+using PrideArtAPI.Models;
 using PrideArtAPI.Services;
 using PrideArtAPI.ViewModels;
 using PrideArtAPI.ViewModels.Accounts;
@@ -121,6 +122,32 @@ public class AccountController : ControllerBase
     }
 
     [Authorize]
+    [HttpGet("v1/accounts/me")]
+    public async Task<IActionResult> GetLoggedUserAsync()
+    {
+        try
+        {
+            var username = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(username))
+                return Unauthorized(new ResultViewModel<string>("Usuário não autenticado."));
+
+            var user = await _accountRepository.GetUserByUsernameAsync(username);
+
+            return Ok(new ResultViewModel<User>(user));
+        }
+        catch (UserNotFoundException ex)
+        {
+            return NotFound(new ResultViewModel<string>(ex.Message));
+        }
+        catch
+        {
+            return StatusCode(500, new ResultViewModel<string>("Erro interno."));
+        }
+    }
+
+
+    [Authorize]
     [HttpPut("v1/accounts/edit-profile")]
     public async Task<IActionResult> EditProfileAsync([FromBody] EditProfileViewModel model)
     {
@@ -130,8 +157,13 @@ public class AccountController : ControllerBase
         try
         {
             var username = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(username))
+                return Unauthorized(new ResultViewModel<string>("Usuário não autenticado."));
+
             var loggedUser = await _accountRepository.GetUserByUsernameAsync(username!);
             var user = await _accountRepository.EditProfileAsync(loggedUser, model);
+
             return Ok(new ResultViewModel<dynamic>(new
             {
                 user,
