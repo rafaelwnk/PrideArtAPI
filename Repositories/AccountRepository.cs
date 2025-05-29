@@ -1,6 +1,7 @@
 using System.Security.Authentication;
 using Microsoft.EntityFrameworkCore;
 using PrideArtAPI.Data;
+using PrideArtAPI.Exceptions;
 using PrideArtAPI.Interfaces;
 using PrideArtAPI.Models;
 using PrideArtAPI.ViewModels.Accounts;
@@ -33,7 +34,7 @@ public class AccountRepository : IAccountRepository
 
         return user;
     }
-    
+
     public async Task<User> LoginAsync(LoginViewModel model)
     {
         var user = await _context.Users
@@ -45,6 +46,35 @@ public class AccountRepository : IAccountRepository
 
         if (!PasswordHasher.Verify(user.Password, model.Password))
             throw new InvalidCredentialException("Usuário ou senha inválidos.");
+
+        return user;
+    }
+
+    public async Task<User> ResetPasswordAsync(ResetPasswordViewModel model)
+    {
+        var user = await _context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Email == model.Email);
+
+        if (user == null)
+            throw new EmailNotFoundException();
+
+        user.Password = PasswordHasher.Hash(model.Password);
+
+        _context.Users.Update(user);
+        await _context.SaveChangesAsync();
+
+        return user;
+    }
+
+    public async Task<User> GetUserByUsernameAsync(string username)
+    {
+        var user = await _context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Username == username);
+
+        if (user == null)
+            throw new UserNotFoundException();
 
         return user;
     }

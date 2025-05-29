@@ -7,5 +7,6 @@ public interface IAccountRepository
 {
     Task<User> RegisterAsync(RegisterViewModel model);
     Task<User> LoginAsync(LoginViewModel model);
-    
+    Task<User> ResetPasswordAsync(ResetPasswordViewModel model);
+    Task<User> GetUserByUsernameAsync(string username);
 }

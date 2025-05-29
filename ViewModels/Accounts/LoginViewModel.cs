@@ -4,9 +4,9 @@ namespace PrideArtAPI.ViewModels.Accounts;
 
 public class LoginViewModel
 {
-    [Required(ErrorMessage = "Informe o usuário.")]
+    [Required(ErrorMessage = "O usuário é obrigatório.")]
     public string Username { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Informe a senha.")]
+    [Required(ErrorMessage = "A senha é obrigatória.")]
     public string Password { get; set; } = string.Empty;
 }
