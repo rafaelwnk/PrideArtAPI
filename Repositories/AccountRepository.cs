@@ -1,4 +1,5 @@
 using System.Security.Authentication;
+using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using PrideArtAPI.Data;
 using PrideArtAPI.Exceptions;
@@ -86,11 +87,20 @@ public class AccountRepository : IAccountRepository
         if (user == null)
             throw new UserNotFoundException();
 
+        if (!string.IsNullOrEmpty(model.Image))
+        {
+            var fileName = $"{Guid.NewGuid()}.jpg";
+            var data = new Regex(@"^data:image\/[a-z]+;base64,").Replace(model.Image, "");
+            var bytes = Convert.FromBase64String(data);
+
+            await System.IO.File.WriteAllBytesAsync($"wwwroot/images/profile-images/{fileName}", bytes);
+            user.Image = $"{Configuration.UrlProfileImage}{fileName}";
+        }
+
         user.Name = model.Name;
         user.Email = model.Email;
         user.Identity = model.Identity;
         user.Bio = model.Bio;
-        user.Image = model.Image;
 
         _context.Users.Update(user);
         await _context.SaveChangesAsync();

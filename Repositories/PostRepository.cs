@@ -57,6 +57,7 @@ public class PostRepository : IPostRepository
         var posts = await _context.Posts
             .AsNoTracking()
             .Where(x => x.UserId != user.Id)
+            .OrderByDescending(x => x.CreatedAt)
             .ToListAsync();
 
         return posts;
@@ -74,6 +75,7 @@ public class PostRepository : IPostRepository
         var posts = await _context.Posts
             .AsNoTracking()
             .Where(x => x.UserId == user.Id)
+            .OrderByDescending(x => x.CreatedAt)
             .ToListAsync();
 
         return posts;
@@ -129,4 +131,79 @@ public class PostRepository : IPostRepository
         return post;
     }
 
+    public async Task<List<Post>> GetFollowingPostsAsync(string username)
+    {
+        var user = await _context.Users
+            .AsNoTracking()
+            .Include(x => x.Following)
+                .ThenInclude(x => x.Posts)
+            .FirstOrDefaultAsync(x => x.Username == username);
+
+        if (user == null)
+            throw new UserNotFoundException();
+
+        var posts = user.Following
+            .SelectMany(x => x.Posts)
+            .OrderByDescending(x => x.CreatedAt)
+            .ToList();
+
+        return posts;
+    }
+
+    public async Task<Post> LikePostAsync(string username, int postId)
+    {
+        var user = await _context.Users
+            .Include(x => x.LikedPosts)
+            .FirstOrDefaultAsync(x => x.Username == username);
+
+        if (user == null)
+            throw new UserNotFoundException();
+
+        var post = await _context.Posts.FirstOrDefaultAsync(x => x.Id == postId);
+
+        if (post == null)
+            throw new PostNotFoundException();
+
+        user.LikedPosts.Add(post);
+        await _context.SaveChangesAsync();
+
+        return post;
+    }
+
+    public async Task<List<Post>> GetLikedPostsAsync(string username)
+    {
+        var user = await _context.Users
+            .AsNoTracking()
+            .Include(x => x.LikedPosts)
+            .FirstOrDefaultAsync(x => x.Username == username);
+
+        if (user == null)
+            throw new UserNotFoundException();
+
+        var posts = user.LikedPosts
+            .OrderByDescending(x => x.CreatedAt)
+            .ToList();
+
+        return posts;
+    }
+
+    public async Task<Post> UnlikePostAsync(string username, int postId)
+    {
+        var user = await _context.Users
+            .Include(x => x.LikedPosts)
+            .FirstOrDefaultAsync(x => x.Username == username);
+
+        if (user == null)
+            throw new UserNotFoundException();
+
+        var post = await _context.Posts.FirstOrDefaultAsync(x => x.Id == postId);
+
+        if (post == null)
+            throw new PostNotFoundException();
+
+        user.LikedPosts.Remove(post);
+        await _context.SaveChangesAsync();
+
+        return post;
+    }
 }
