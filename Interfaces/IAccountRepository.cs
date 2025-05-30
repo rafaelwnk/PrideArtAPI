@@ -9,5 +9,9 @@ public interface IAccountRepository
     Task<User> LoginAsync(LoginViewModel model);
     Task<User> ResetPasswordAsync(ResetPasswordViewModel model);
     Task<User> GetUserByUsernameAsync(string username);
-    Task<User> EditProfileAsync(User user, EditProfileViewModel model);
+    Task<User> EditProfileAsync(string username, EditProfileViewModel model);
+    Task<User> DeleteProfileAsync(string username);
+    Task<User> FollowUserAsync(string username, string followedUsername);
+    Task<List<User>> GetFollowingUsersAsync(string username);
+    Task<User> UnfollowUserAsync(string username, string unfollowedUsername);
 }

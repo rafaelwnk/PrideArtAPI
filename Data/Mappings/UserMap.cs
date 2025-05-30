@@ -60,19 +60,19 @@ public class UserMap : IEntityTypeConfiguration<User>
             .UsingEntity<Dictionary<string, object>>
             (
                 "UserFollows",
+                followee => followee.HasOne<User>()
+                    .WithMany()
+                    .HasForeignKey("FolloweeId")
+                    .HasConstraintName("FK_UserFollows_FolloweeId")
+                    .OnDelete(DeleteBehavior.Cascade),
                 user => user.HasOne<User>()
                     .WithMany()
                     .HasForeignKey("UserId")
                     .HasConstraintName("FK_UserFollows_UserId")
-                    .OnDelete(DeleteBehavior.Cascade),
-                followed => followed.HasOne<User>()
-                    .WithMany()
-                    .HasForeignKey("FollowedId")
-                    .HasConstraintName("FK_UserFollows_FollowedId")
                     .OnDelete(DeleteBehavior.Cascade)
             )
             .Property<int>("UserId")
-            .HasColumnOrder(0); 
+            .HasColumnOrder(0);
 
         builder.HasIndex(x => x.Username, "IX_User_Username").IsUnique();
         builder.HasIndex(x => x.Email, "IX_User_Email").IsUnique();

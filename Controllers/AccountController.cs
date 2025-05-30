@@ -148,9 +148,7 @@ public class AccountController : ControllerBase
 
         try
         {
-            var loggedUser = await _accountRepository.GetUserByUsernameAsync(User.Identity!.Name!);
-            var user = await _accountRepository.EditProfileAsync(loggedUser, model);
-
+            var user = await _accountRepository.EditProfileAsync(User.Identity!.Name!, model);
             return Ok(new ResultViewModel<dynamic>(new
             {
                 user,
@@ -164,6 +162,103 @@ public class AccountController : ControllerBase
         catch (DbUpdateException)
         {
             return StatusCode(400, new ResultViewModel<string>("Não foi possível atualizar o perfil."));
+        }
+        catch
+        {
+            return StatusCode(500, new ResultViewModel<string>("Erro interno."));
+        }
+    }
+
+    [Authorize]
+    [HttpDelete("v1/accounts")]
+    public async Task<IActionResult> DeleteProfileAsync()
+    {
+        try
+        {
+            var user = await _accountRepository.DeleteProfileAsync(User.Identity!.Name!);
+            return Ok(new ResultViewModel<dynamic>(new
+            {
+                user,
+                message = "Usuário excluído com sucesso!"
+            }));
+        }
+        catch (UserNotFoundException ex)
+        {
+            return NotFound(new ResultViewModel<string>(ex.Message));
+        }
+        catch (DbUpdateException)
+        {
+            return StatusCode(400, new ResultViewModel<string>("Não foi possível deletar o perfil."));
+        }
+        catch
+        {
+            return StatusCode(500, new ResultViewModel<string>("Erro interno."));
+        }
+    }
+
+    [Authorize]
+    [HttpPost("v1/accounts/{followedUsername}/follow")]
+    public async Task<IActionResult> FollowUserAsync([FromRoute] string followedUsername)
+    {
+        try
+        {
+            var user = await _accountRepository.FollowUserAsync(User.Identity!.Name!, followedUsername);
+            return Ok(new ResultViewModel<User>(user));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new ResultViewModel<string>(ex.Message));
+        }
+        catch (UserNotFoundException ex)
+        {
+            return NotFound(new ResultViewModel<string>(ex.Message));
+        }
+        catch
+        {
+            return StatusCode(500, new ResultViewModel<string>("Erro interno."));
+        }
+
+    }
+
+    [Authorize]
+    [HttpGet("v1/accounts/following")]
+    public async Task<IActionResult> GetFollowingUsersAsync()
+    {
+        try
+        {
+            var users = await _accountRepository.GetFollowingUsersAsync(User.Identity!.Name!);
+            return Ok(new ResultViewModel<List<User>>(users));
+        }
+        catch (UserNotFoundException ex)
+        {
+            return NotFound(new ResultViewModel<string>(ex.Message));
+        }
+        catch
+        {
+            return StatusCode(500, new ResultViewModel<string>("Erro interno."));
+        }
+    }
+
+    [Authorize]
+    [HttpDelete("v1/accounts/{unfollowedUsername}/unfollow")]
+    public async Task<IActionResult> UnfollowUserAsync([FromRoute] string unfollowedUsername)
+    {
+        try
+        {
+            var user = await _accountRepository.UnfollowUserAsync(User.Identity!.Name!, unfollowedUsername);
+            return Ok(new ResultViewModel<User>(user));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new ResultViewModel<string>(ex.Message));
+        }
+        catch (UserNotFoundException ex)
+        {
+            return NotFound(new ResultViewModel<string>(ex.Message));
+        }
+        catch (DbUpdateException)
+        {
+            return StatusCode(400, new ResultViewModel<string>("Não foi possível deixar de seguir o usuário."));
         }
         catch
         {

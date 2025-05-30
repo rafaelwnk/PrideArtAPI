@@ -78,8 +78,14 @@ public class AccountRepository : IAccountRepository
         return user;
     }
 
-    public async Task<User> EditProfileAsync(User user, EditProfileViewModel model)
+    public async Task<User> EditProfileAsync(string username, EditProfileViewModel model)
     {
+        var user = await _context.Users
+            .FirstOrDefaultAsync(x => x.Username == username);
+
+        if (user == null)
+            throw new UserNotFoundException();
+
         user.Name = model.Name;
         user.Email = model.Email;
         user.Identity = model.Identity;
@@ -90,5 +96,78 @@ public class AccountRepository : IAccountRepository
         await _context.SaveChangesAsync();
 
         return user;
+    }
+
+    public async Task<User> DeleteProfileAsync(string username)
+    {
+        var user = await _context.Users
+            .FirstOrDefaultAsync(x => x.Username == username);
+
+        if (user == null)
+            throw new UserNotFoundException();
+
+        _context.Users.Remove(user);
+        await _context.SaveChangesAsync();
+
+        return user;
+    }
+
+    public async Task<User> FollowUserAsync(string username, string followedUsername)
+    {
+        if (username == followedUsername)
+            throw new InvalidOperationException("Você não pode seguir a si mesmo.");
+
+        var user = await _context.Users
+            .Include(x => x.Following)
+            .FirstOrDefaultAsync(x => x.Username == username);
+
+        var followedUser = await _context.Users
+            .FirstOrDefaultAsync(x => x.Username == followedUsername);
+
+        if (user == null || followedUser == null)
+            throw new UserNotFoundException();
+
+        if (user.Following.Any(x => x.Id == followedUser.Id))
+            throw new InvalidOperationException("Você já está seguindo este usuário.");
+
+        user.Following.Add(followedUser);
+        await _context.SaveChangesAsync();
+
+        return followedUser;
+    }
+
+    public async Task<List<User>> GetFollowingUsersAsync(string username)
+    {
+        var user = await _context.Users
+            .Include(x => x.Following)
+            .FirstOrDefaultAsync(x => x.Username == username);
+
+        if (user == null)
+            throw new UserNotFoundException();
+
+        return user.Following;
+    }
+
+    public async Task<User> UnfollowUserAsync(string username, string unfollowedUsername)
+    {
+        if (username == unfollowedUsername)
+            throw new InvalidOperationException("Você não pode deixar de seguir a si mesmo.");
+
+        var user = await _context.Users
+            .Include(x => x.Following)
+            .FirstOrDefaultAsync(x => x.Username == username);
+
+        if (user == null)
+            throw new UserNotFoundException();
+
+        var unfollowedUser = user.Following.FirstOrDefault(x => x.Username == unfollowedUsername);
+
+        if (unfollowedUser == null)
+            throw new InvalidOperationException("Você não segue este usuário.");
+
+        user.Following.Remove(unfollowedUser);
+        await _context.SaveChangesAsync();
+
+        return unfollowedUser;
     }
 }
