@@ -138,7 +138,6 @@ public class AccountController : ControllerBase
         }
     }
 
-
     [Authorize]
     [HttpPut("v1/accounts/edit-profile")]
     public async Task<IActionResult> EditProfileAsync([FromBody] EditProfileViewModel model)
@@ -189,6 +188,25 @@ public class AccountController : ControllerBase
         catch (DbUpdateException)
         {
             return StatusCode(400, new ResultViewModel<string>("Não foi possível deletar o perfil."));
+        }
+        catch
+        {
+            return StatusCode(500, new ResultViewModel<string>("Erro interno."));
+        }
+    }
+
+    [Authorize]
+    [HttpGet("v1/accounts/{username}")]
+    public async Task<IActionResult> GetUserByUsernameAsync([FromRoute] string username)
+    {
+        try
+        {
+            var user = await _accountRepository.GetUserByUsernameAsync(username);
+            return Ok(new ResultViewModel<User>(user));
+        }
+        catch (UserNotFoundException ex)
+        {
+            return NotFound(new ResultViewModel<string>(ex.Message));
         }
         catch
         {

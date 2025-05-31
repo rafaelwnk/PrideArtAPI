@@ -47,11 +47,17 @@ public class PostRepository : IPostRepository
 
     public async Task<List<Post>> GetAllPostsAsync(string username)
     {
+        var user = await _context.Users
+            .AsNoTracking()
+            .Include(x => x.Following)
+            .FirstOrDefaultAsync(x => x.Username == username);
+
+        var followingUsersIds = user!.Following.Select(x => x.Id);
 
         var posts = await _context.Posts
             .AsNoTracking()
             .Include(x => x.User)
-            .Where(x => x.User!.Username != username)
+            .Where(x => x.User!.Username != username && !followingUsersIds.Contains(x.Id))
             .OrderByDescending(x => x.CreatedAt)
             .ToListAsync();
 
@@ -171,6 +177,7 @@ public class PostRepository : IPostRepository
         var user = await _context.Users
             .AsNoTracking()
             .Include(x => x.LikedPosts)
+                .ThenInclude(x => x.User)
             .FirstOrDefaultAsync(x => x.Username == username);
 
         if (user == null)
