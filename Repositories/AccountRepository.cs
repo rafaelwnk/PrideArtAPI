@@ -27,7 +27,8 @@ public class AccountRepository : IAccountRepository
             Username = model.Username,
             Email = model.Email,
             Identity = model.Identity,
-            Password = PasswordHasher.Hash(model.Password)
+            Password = PasswordHasher.Hash(model.Password),
+            Image = $"{Configuration.UrlProfileImage}default-profile-picture.png"
         };
 
         await _context.Users.AddAsync(user);
