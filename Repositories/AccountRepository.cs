@@ -71,6 +71,7 @@ public class AccountRepository : IAccountRepository
     public async Task<User> GetUserByUsernameAsync(string username)
     {
         var user = await _context.Users
+            .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Username == username);
 
         if (user == null)
@@ -120,6 +121,26 @@ public class AccountRepository : IAccountRepository
         await _context.SaveChangesAsync();
 
         return user;
+    }
+
+    public async Task<List<User>> GetUsersAsync(string username)
+    {
+        var user = await _context.Users
+            .AsNoTracking()
+            .Include(x => x.Following)
+            .FirstOrDefaultAsync(x => x.Username == username);
+
+        if (user == null)
+            throw new UserNotFoundException();
+
+        var followingUsersIds = user.Following.Select(x => x.Id);
+
+        var users = await _context.Users
+            .AsNoTracking()
+            .Where(x => x.Username != username && !followingUsersIds.Contains(x.Id))
+            .ToListAsync();
+
+        return users;
     }
 
     public async Task<User> FollowUserAsync(string username, string followedUsername)

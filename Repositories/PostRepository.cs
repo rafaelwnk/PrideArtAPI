@@ -47,16 +47,11 @@ public class PostRepository : IPostRepository
 
     public async Task<List<Post>> GetAllPostsAsync(string username)
     {
-        var user = await _context.Users
-            .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Username == username);
-
-        if (user == null)
-            throw new UserNotFoundException();
 
         var posts = await _context.Posts
             .AsNoTracking()
-            .Where(x => x.UserId != user.Id)
+            .Include(x => x.User)
+            .Where(x => x.User!.Username != username)
             .OrderByDescending(x => x.CreatedAt)
             .ToListAsync();
 
@@ -74,6 +69,7 @@ public class PostRepository : IPostRepository
 
         var posts = await _context.Posts
             .AsNoTracking()
+            .Include(x => x.User)
             .Where(x => x.UserId == user.Id)
             .OrderByDescending(x => x.CreatedAt)
             .ToListAsync();

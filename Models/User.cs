@@ -16,4 +16,5 @@ public class User
     public List<Post> Posts { get; set; } = new();
     public List<Post> LikedPosts { get; set; } = new();
     public List<User> Following { get; set; } = new();
+    public List<User> Followers { get; set; } = new();
 }

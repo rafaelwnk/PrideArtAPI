@@ -56,7 +56,7 @@ public class UserMap : IEntityTypeConfiguration<User>
             .HasColumnType("VARCHAR");
 
         builder.HasMany(x => x.Following)
-            .WithMany()
+            .WithMany(x => x.Followers)
             .UsingEntity<Dictionary<string, object>>
             (
                 "UserFollows",
@@ -65,13 +65,13 @@ public class UserMap : IEntityTypeConfiguration<User>
                     .HasForeignKey("FolloweeId")
                     .HasConstraintName("FK_UserFollows_FolloweeId")
                     .OnDelete(DeleteBehavior.Cascade),
-                user => user.HasOne<User>()
+                follower => follower.HasOne<User>()
                     .WithMany()
-                    .HasForeignKey("UserId")
-                    .HasConstraintName("FK_UserFollows_UserId")
+                    .HasForeignKey("FollowerId")
+                    .HasConstraintName("FK_UserFollows_FollowerId")
                     .OnDelete(DeleteBehavior.Cascade)
             )
-            .Property<int>("UserId")
+            .Property<int>("FollowerId")
             .HasColumnOrder(0);
 
         builder.HasIndex(x => x.Username, "IX_User_Username").IsUnique();

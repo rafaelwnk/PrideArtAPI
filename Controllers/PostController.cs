@@ -55,17 +55,13 @@ public class PostController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet("v1/posts")]
+    [HttpGet("v1/posts/explore")]
     public async Task<IActionResult> GetAllPostsAsync()
     {
         try
         {
             var posts = await _postRepository.GetAllPostsAsync(User.Identity!.Name!);
             return Ok(new ResultViewModel<List<Post>>(posts));
-        }
-        catch (UserNotFoundException ex)
-        {
-            return NotFound(new ResultViewModel<string>(ex.Message));
         }
         catch
         {

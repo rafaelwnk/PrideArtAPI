@@ -197,6 +197,25 @@ public class AccountController : ControllerBase
     }
 
     [Authorize]
+    [HttpGet("v1/accounts/explore")]
+    public async Task<IActionResult> GetUsersAsync()
+    {
+        try
+        {
+            var users = await _accountRepository.GetUsersAsync(User.Identity!.Name!);
+            return Ok(new ResultViewModel<List<User>>(users));
+        }
+        catch (UserNotFoundException ex)
+        {
+            return NotFound(new ResultViewModel<string>(ex.Message));
+        }
+        catch
+        {
+            return StatusCode(500, new ResultViewModel<string>("Erro interno."));
+        }
+    }
+
+    [Authorize]
     [HttpPost("v1/accounts/{followedUsername}/follow")]
     public async Task<IActionResult> FollowUserAsync([FromRoute] string followedUsername)
     {
