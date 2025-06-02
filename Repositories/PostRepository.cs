@@ -58,7 +58,7 @@ public class PostRepository : IPostRepository
             .AsNoTracking()
             .Include(x => x.User)
             .Include(x => x.UsersLiked)
-            .Where(x => x.User!.Username != username && !followingUsersIds.Contains(x.Id))
+            .Where(x => x.User!.Username != username && !followingUsersIds.Contains(x.User.Id))
             .OrderByDescending(x => x.CreatedAt)
             .ToListAsync();
 
