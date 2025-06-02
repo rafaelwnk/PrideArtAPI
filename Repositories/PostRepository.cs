@@ -57,6 +57,7 @@ public class PostRepository : IPostRepository
         var posts = await _context.Posts
             .AsNoTracking()
             .Include(x => x.User)
+            .Include(x => x.UsersLiked)
             .Where(x => x.User!.Username != username && !followingUsersIds.Contains(x.Id))
             .OrderByDescending(x => x.CreatedAt)
             .ToListAsync();
@@ -76,6 +77,7 @@ public class PostRepository : IPostRepository
         var posts = await _context.Posts
             .AsNoTracking()
             .Include(x => x.User)
+            .Include(x => x.UsersLiked)
             .Where(x => x.UserId == user.Id)
             .OrderByDescending(x => x.CreatedAt)
             .ToListAsync();
@@ -139,6 +141,7 @@ public class PostRepository : IPostRepository
             .AsNoTracking()
             .Include(x => x.Following)
                 .ThenInclude(x => x.Posts)
+                    .ThenInclude(x => x.UsersLiked)
             .FirstOrDefaultAsync(x => x.Username == username);
 
         if (user == null)
