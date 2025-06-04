@@ -164,7 +164,9 @@ public class PostRepository : IPostRepository
         if (user == null)
             throw new UserNotFoundException();
 
-        var post = await _context.Posts.FirstOrDefaultAsync(x => x.Id == postId);
+        var post = await _context.Posts
+            .Include(x => x.UsersLiked)
+            .FirstOrDefaultAsync(x => x.Id == postId);
 
         if (post == null)
             throw new PostNotFoundException();
@@ -178,9 +180,10 @@ public class PostRepository : IPostRepository
     public async Task<List<Post>> GetLikedPostsAsync(string username)
     {
         var user = await _context.Users
-            .AsNoTracking()
             .Include(x => x.LikedPosts)
                 .ThenInclude(x => x.User)
+            .Include(x => x.LikedPosts)
+                .ThenInclude(x => x.UsersLiked)
             .FirstOrDefaultAsync(x => x.Username == username);
 
         if (user == null)
@@ -202,7 +205,9 @@ public class PostRepository : IPostRepository
         if (user == null)
             throw new UserNotFoundException();
 
-        var post = await _context.Posts.FirstOrDefaultAsync(x => x.Id == postId);
+        var post = await _context.Posts
+            .Include(x => x.UsersLiked)
+            .FirstOrDefaultAsync(x => x.Id == postId);
 
         if (post == null)
             throw new PostNotFoundException();
