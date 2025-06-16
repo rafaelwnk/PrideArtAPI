@@ -30,7 +30,7 @@ public class PostController : ControllerBase
         try
         {
             var post = await _postRepository.CreatePostAsync(model, User.Identity!.Name!);
-            return Ok(new ResultViewModel<dynamic>(new
+            return Created($"/v1/posts/{post.Id}", new ResultViewModel<dynamic>(new
             {
                 post,
                 message = "Post criado com sucesso!"

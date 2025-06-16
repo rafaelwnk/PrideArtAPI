@@ -31,7 +31,7 @@ public class AccountController : ControllerBase
         try
         {
             var user = await _accountRepository.RegisterAsync(model);
-            return Ok(new ResultViewModel<dynamic>(new
+            return Created($"/v1/accounts/{user.Username}", new ResultViewModel<dynamic>(new
             {
                 user,
                 message = "Cadastro realizado com sucesso!"
