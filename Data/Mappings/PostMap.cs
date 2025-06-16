@@ -39,16 +39,16 @@ public class PostMap : IEntityTypeConfiguration<Post>
         builder.HasMany(x => x.UsersLiked)
             .WithMany(x => x.LikedPosts)
             .UsingEntity<Dictionary<string, object>>(
-                "PostsLikes",
+                "PostLikes",
                 user => user.HasOne<User>()
                     .WithMany()
                     .HasForeignKey("UserId")
-                    .HasConstraintName("FK_PostsLikes_UserId")
+                    .HasConstraintName("FK_PostLikes_UserId")
                     .OnDelete(DeleteBehavior.Cascade),
                 post => post.HasOne<Post>()
                     .WithMany()
                     .HasForeignKey("PostId")
-                    .HasConstraintName("FK_PostsLikes_PostId")
+                    .HasConstraintName("FK_PostLikes_PostId")
                     .OnDelete(DeleteBehavior.Cascade)
             );
 
